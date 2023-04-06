@@ -25,6 +25,7 @@ from langchain.agents.tools import Tool
 from langchain.chains.conversation.memory import ConversationBufferMemory
 from langchain.llms.openai import OpenAI
 
+# PAY ATTENTION
 VISUAL_CHATGPT_PREFIX = """Visual ChatGPT is designed to be able to assist with a wide range of text and visual related tasks, from answering simple questions to providing in-depth explanations and discussions on a wide range of topics. Visual ChatGPT is able to generate human-like text based on the input it receives, allowing it to engage in natural-sounding conversations and provide responses that are coherent and relevant to the topic at hand.
 
 Visual ChatGPT is able to process and understand large amounts of text and images. As a language model, Visual ChatGPT can not directly read images, but it has a list of tools to finish different visual tasks. Each image will have a file name formed as "image/xxx.png", and Visual ChatGPT can invoke different tools to indirectly understand pictures. When talking about images, Visual ChatGPT is very strict to the file name and will never fabricate nonexistent files. When using tools to generate new image files, Visual ChatGPT is also known that the image may not be the same as the user's demand, and will use other visual question answering tools or description tools to observe the real image. Visual ChatGPT is able to use tools in a sequence, and is loyal to the tool observation outputs rather than faking the image content and image file name. It will remember to provide the file name from the last tool observation, if a new image is generated.
@@ -38,7 +39,7 @@ TOOLS:
 ------
 
 Visual ChatGPT  has access to the following tools:"""
-
+# PAY ATTENTION
 VISUAL_CHATGPT_FORMAT_INSTRUCTIONS = """To use a tool, please use the following format:
 
 ```
@@ -55,7 +56,7 @@ Thought: Do I need to use a tool? No
 {ai_prefix}: [your response here]
 ```
 """
-
+# PAY ATTENTION
 VISUAL_CHATGPT_SUFFIX = """You are very strict to the filename correctness and will never fake a file name if it does not exist.
 You will remember to provide the image file name loyally if it's provided in the last tool observation.
 
@@ -175,6 +176,7 @@ def get_new_image_name(org_img_name, func_name="update"):
         assert len(name_split) == 4
         most_org_file_name = name_split[3]
     recent_prev_file_name = name_split[0]
+    # PAY ATTENTION
     new_file_name = f'{this_new_uuid}_{func_name}_{recent_prev_file_name}_{most_org_file_name}.png'
     return os.path.join(head, new_file_name)
 
@@ -219,7 +221,7 @@ class ImageEditing:
         self.torch_dtype = torch.float16 if 'cuda' in device else torch.float32
         self.inpaint = StableDiffusionInpaintPipeline.from_pretrained(
             "runwayml/stable-diffusion-inpainting", revision=self.revision, torch_dtype=self.torch_dtype).to(device)
-
+    # PAY ATTENTION
     @prompts(name="Remove Something From The Photo",
              description="useful when you want to remove and object or something from the photo "
                          "from its description or location. "
@@ -970,7 +972,7 @@ class InfinityOutPainting:
               f"Output Image: {updated_image_path}")
         return updated_image_path
 
-
+# PAY ATTENTION
 class ConversationBot:
     def __init__(self, load_dict):
         # load_dict = {'VisualQuestionAnswering':'cuda:0', 'ImageCaptioning':'cuda:1',...}
@@ -978,6 +980,7 @@ class ConversationBot:
         if 'ImageCaptioning' not in load_dict:
             raise ValueError("You have to load ImageCaptioning as a basic function for VisualChatGPT")
 
+        # PAY ATTENTION
         self.llm = OpenAI(temperature=0)
         self.memory = ConversationBufferMemory(memory_key="chat_history", output_key='output')
 
@@ -1000,6 +1003,7 @@ class ConversationBot:
                 if e.startswith('inference'):
                     func = getattr(instance, e)
                     self.tools.append(Tool(name=func.name, description=func.description, func=func))
+        # PAY ATTENTION
         self.agent = initialize_agent(
             self.tools,
             self.llm,
@@ -1034,6 +1038,7 @@ class ConversationBot:
         img.save(image_filename, "PNG")
         print(f"Resize image form {width}x{height} to {width_new}x{height_new}")
         description = self.models['ImageCaptioning'].inference(image_filename)
+        # PAY ATTENTION
         Human_prompt = f'\nHuman: provide a figure named {image_filename}. The description is: {description}. This information helps you to understand this image, but you should use tools to finish following tasks, rather than directly imagine from my description. If you understand, say \"Received\". \n'
         AI_prompt = "Received.  "
         self.agent.memory.buffer = self.agent.memory.buffer + Human_prompt + 'AI: ' + AI_prompt
